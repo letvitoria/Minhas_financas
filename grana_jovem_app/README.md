@@ -1,6 +1,6 @@
 # Grana Jovem — Flutter + Supabase
 
-Starter multiplataforma para gerenciamento de finanças pessoais. A interface usa uma linguagem visual própria com laranja vibrante, superfícies arredondadas e temas claro/escuro, inspirada em padrões comuns de apps financeiros. **Não é um produto oficial nem afiliado ao Banco Inter.**
+Aplicativo multiplataforma para gerenciamento de finanças pessoais. A interface usa uma linguagem visual própria com laranja vibrante, superfícies arredondadas e temas claro/escuro, inspirada em padrões comuns de apps financeiros. **Não é um produto oficial nem afiliado ao Banco Inter.**
 
 ## Stack
 
@@ -11,7 +11,7 @@ Starter multiplataforma para gerenciamento de finanças pessoais. A interface us
 - `flutter_dotenv` para configuração local
 - Material 3, Google Fonts e `intl`
 
-## O que já está no starter
+## Funcionalidades
 
 - Login e cadastro por e-mail/senha com Supabase Auth
 - Gate de autenticação e navegação inferior
@@ -24,7 +24,7 @@ Starter multiplataforma para gerenciamento de finanças pessoais. A interface us
 - Repositório Supabase separado da camada de UI e estado via Provider
 - SQL inicial com tabelas, grants e políticas RLS
 
-> É um MVP inicial: não inclui integração bancária Open Finance, conciliação automática, notificações push, cálculo de rentabilidade real, exportação ou testes de integração. Os valores cadastrados são informados pelo usuário.
+> É um MVP: não inclui integração bancária Open Finance, conciliação automática, notificações push, cálculo de rentabilidade real, exportação ou testes de integração. Os valores cadastrados são informados pelo usuário.
 
 ## 1. Pré-requisitos
 
@@ -39,21 +39,9 @@ Starter multiplataforma para gerenciamento de finanças pessoais. A interface us
 
 O `pubspec.yaml` exige Dart 3.9 ou superior. Consulte `flutter --version` se houver incompatibilidade.
 
-## 2. Gerar as pastas nativas do Flutter
+## 2. Projeto Flutter
 
-O ZIP contém o código-fonte Dart e o schema SQL. As pastas nativas (`android/`, `ios/` e `web/`) são geradas pelo próprio Flutter, conforme a máquina de desenvolvimento.
-
-**Windows PowerShell** — dentro da pasta extraída:
-```powershell
-.\scripts\bootstrap.ps1
-```
-
-**macOS / Linux** — dentro da pasta extraída:
-```bash
-./scripts/bootstrap.sh
-```
-
-Os scripts criam a pasta irmã `grana_jovem_app`, geram o projeto Flutter multiplataforma e copiam os arquivos do starter. Eles não sobrescrevem uma pasta `grana_jovem_app` que já exista.
+Este repositório já contém o projeto Flutter completo, incluindo as pastas nativas `android/`, `ios/` e `web/`. Não é necessário gerar um segundo diretório nem executar scripts de bootstrap.
 
 ## 3. Configurar o Supabase
 
@@ -61,7 +49,7 @@ Os scripts criam a pasta irmã `grana_jovem_app`, geram o projeto Flutter multip
 2. Copie a **Project URL** e a chave **Publishable** (`sb_publishable_...`).
 3. No SQL Editor, execute todo o arquivo `supabase/schema.sql`.
 4. Em **Authentication → Providers → Email**, mantenha Email habilitado. Para testes, você pode desativar temporariamente a confirmação de e-mail; em produção, configure SMTP e mantenha a confirmação habilitada.
-5. Em **Authentication → URL Configuration**, configure os redirect URLs caso utilize confirmação por link ou recuperação de senha. Este starter usa e-mail/senha sem deep link de recuperação.
+5. Em **Authentication → URL Configuration**, configure os redirect URLs caso utilize confirmação por link ou recuperação de senha. Este app usa e-mail/senha sem deep link de recuperação.
 
 ### Chaves e segurança
 
