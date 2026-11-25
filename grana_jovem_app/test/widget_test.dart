@@ -1,30 +1,34 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
-
-import 'package:grana_jovem/main.dart';
+import 'package:grana_jovem/data/models/finance_models.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('FinanceTransaction lê metadata JSONB', () {
+    final transaction = FinanceTransaction.fromMap({
+      'id': '00000000-0000-0000-0000-000000000001',
+      'title': 'Mercado',
+      'type': 'expense',
+      'category': 'Alimentação',
+      'amount': 150,
+      'occurred_on': '2026-11-24',
+      'metadata': {
+        'tags': ['mercado', 'semanal'],
+        'location': 'Supermercado X',
+      },
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(transaction.amount, 150);
+    expect(transaction.metadata['location'], 'Supermercado X');
+    expect(transaction.metadata['tags'], ['mercado', 'semanal']);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  test('WishlistGoal calcula progresso limitado', () {
+    const goal = WishlistGoal(
+      id: '00000000-0000-0000-0000-000000000002',
+      title: 'Viagem',
+      targetAmount: 1000,
+      savedAmount: 250,
+    );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(goal.progress, 0.25);
   });
 }

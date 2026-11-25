@@ -9,7 +9,9 @@ create table if not exists public.transactions (
   category text not null default 'Geral',
   amount numeric(12,2) not null check (amount > 0),
   occurred_on date not null default current_date,
-  created_at timestamptz not null default now()
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  constraint transactions_metadata_object check (jsonb_typeof(metadata) = 'object')
 );
 
 create table if not exists public.bills (
@@ -101,3 +103,104 @@ create index if not exists bills_user_due_idx on public.bills(user_id, due_date)
 create index if not exists income_user_date_idx on public.income_sources(user_id, received_on desc);
 create index if not exists investments_user_category_idx on public.investments(user_id, category);
 create index if not exists wishlist_user_idx on public.wishlist_goals(user_id);
+create index if not exists transactions_category_idx on public.transactions(category);
+create index if not exists transactions_metadata_gin_idx on public.transactions using gin(metadata);
+
+create or replace function public.sp_pay_bill(p_bill_id uuid, p_user_id uuid)
+returns void
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  v_bill public.bills%rowtype;
+begin
+  if p_user_id <> (select auth.uid()) then
+    raise exception 'Usuário não autorizado';
+  end if;
+
+  select * into v_bill
+  from public.bills
+  where id = p_bill_id
+    and user_id = p_user_id
+  for update;
+
+  if not found then
+    raise exception 'Conta não encontrada ou não pertence ao usuário';
+  end if;
+
+  if v_bill.is_paid then
+    raise exception 'Conta já está paga';
+  end if;
+
+  update public.bills
+  set is_paid = true
+  where id = v_bill.id
+    and user_id = p_user_id;
+
+  insert into public.transactions (
+    user_id, title, type, category, amount, occurred_on, metadata
+  ) values (
+    p_user_id,
+    v_bill.title,
+    'expense',
+    'Contas',
+    v_bill.amount,
+    current_date,
+    jsonb_build_object(
+      'bill_paid', true,
+      'bill_id', v_bill.id,
+      'due_date', v_bill.due_date,
+      'paid_at', now()
+    )
+  );
+end;
+$$;
+
+create or replace view public.v_user_financial_summary
+with (security_invoker = true) as
+select
+  user_id,
+  coalesce(sum(amount) filter (where type = 'income'), 0::numeric) as total_income,
+  coalesce(sum(amount) filter (where type = 'expense'), 0::numeric) as total_expenses,
+  coalesce(sum(amount) filter (where type = 'income'), 0::numeric)
+    - coalesce(sum(amount) filter (where type = 'expense'), 0::numeric) as balance
+from public.transactions
+group by user_id;
+
+create or replace function public.fn_filter_transactions_by_metadata_text(
+  p_key text,
+  p_value text
+)
+returns setof public.transactions
+language sql
+stable
+security invoker
+set search_path = public
+as $$
+  select t.*
+  from public.transactions as t
+  where t.user_id = (select auth.uid())
+    and t.metadata ->> p_key = p_value;
+$$;
+
+create or replace function public.fn_filter_transactions_by_metadata_array(
+  p_key text,
+  p_value text
+)
+returns setof public.transactions
+language sql
+stable
+security invoker
+set search_path = public
+as $$
+  select t.*
+  from public.transactions as t
+  where t.user_id = (select auth.uid())
+    and (t.metadata -> p_key) @> jsonb_build_array(p_value);
+$$;
+
+grant select on public.v_user_financial_summary to authenticated;
+grant execute on function public.sp_pay_bill(uuid, uuid) to authenticated;
+grant execute on function public.fn_filter_transactions_by_metadata_text(text, text) to authenticated;
+grant execute on function public.fn_filter_transactions_by_metadata_array(text, text) to authenticated;
