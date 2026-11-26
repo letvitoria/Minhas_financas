@@ -48,8 +48,8 @@ class IncomePage extends StatelessWidget {
                 const SizedBox(height: 12),
                 TextField(
                   controller: amount,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [BrazilianMoneyInputFormatter()],
                   decoration:
                       const InputDecoration(labelText: 'Valor (ex.: 1800,00)'),
                 ),
@@ -82,21 +82,28 @@ class IncomePage extends StatelessWidget {
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () async {
-                    final parsed = double.tryParse(
-                      amount.text.replaceAll('.', '').replaceAll(',', '.'),
-                    );
-                    if (title.text.trim().isEmpty ||
-                        parsed == null ||
-                        parsed <= 0) {
+                    final parsed = parseBrazilianMoney(amount.text);
+                    if (title.text.trim().isEmpty || parsed == null || parsed <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Informe uma descrição e um valor válido maior que zero.')),
+                      );
                       return;
                     }
-                    await context.read<FinanceProvider>().addIncome(
+                    try {
+                      await context.read<FinanceProvider>().addIncome(
                           title: title.text.trim(),
                           amount: parsed,
                           frequency: frequency,
                           receivedOn: receivedOn,
                         );
-                    if (context.mounted) Navigator.pop(context);
+                      if (context.mounted) Navigator.pop(context);
+                    } catch (error) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Não foi possível salvar. $error')),
+                        );
+                      }
+                    }
                   },
                   child: const Text('Salvar renda'),
                 ),

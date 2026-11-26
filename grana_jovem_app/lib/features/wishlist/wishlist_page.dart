@@ -48,8 +48,8 @@ class WishlistPage extends StatelessWidget {
                 const SizedBox(height: 12),
                 TextField(
                   controller: amount,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [BrazilianMoneyInputFormatter()],
                   decoration: const InputDecoration(
                     labelText: 'Quanto precisa juntar?',
                   ),
@@ -76,20 +76,27 @@ class WishlistPage extends StatelessWidget {
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () async {
-                    final parsed = double.tryParse(
-                      amount.text.replaceAll('.', '').replaceAll(',', '.'),
-                    );
-                    if (title.text.trim().isEmpty ||
-                        parsed == null ||
-                        parsed <= 0) {
+                    final parsed = parseBrazilianMoney(amount.text);
+                    if (title.text.trim().isEmpty || parsed == null || parsed <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Informe uma descrição e um valor válido maior que zero.')),
+                      );
                       return;
                     }
-                    await context.read<FinanceProvider>().addGoal(
+                    try {
+                      await context.read<FinanceProvider>().addGoal(
                           title: title.text.trim(),
                           targetAmount: parsed,
                           targetDate: targetDate,
                         );
-                    if (context.mounted) Navigator.pop(context);
+                      if (context.mounted) Navigator.pop(context);
+                    } catch (error) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Não foi possível salvar. $error')),
+                        );
+                      }
+                    }
                   },
                   child: const Text('Criar meta'),
                 ),
@@ -113,6 +120,7 @@ class WishlistPage extends StatelessWidget {
           controller: amount,
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [BrazilianMoneyInputFormatter()],
           decoration: const InputDecoration(labelText: 'Quanto você guardou?'),
         ),
         actions: [
@@ -122,9 +130,7 @@ class WishlistPage extends StatelessWidget {
           ),
           FilledButton(
             onPressed: () async {
-              final parsed = double.tryParse(
-                amount.text.replaceAll('.', '').replaceAll(',', '.'),
-              );
+              final parsed = parseBrazilianMoney(amount.text);
               if (parsed == null || parsed <= 0) return;
               try {
                 await context.read<FinanceProvider>().addToGoal(goal, parsed);

@@ -37,12 +37,29 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 18),
               TextField(controller: title, decoration: const InputDecoration(labelText: 'No que você gastou?')),
               const SizedBox(height: 12),
-              TextField(controller: amount, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Valor (ex.: 45,90)')),
+              TextField(controller: amount, keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [BrazilianMoneyInputFormatter()], decoration: const InputDecoration(labelText: 'Valor (ex.: 45,90)')),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(initialValue: category, decoration: const InputDecoration(labelText: 'Categoria'), items: const [DropdownMenuItem(value: 'Dia a dia', child: Text('Dia a dia')), DropdownMenuItem(value: 'Moradia', child: Text('Moradia')), DropdownMenuItem(value: 'Transporte', child: Text('Transporte')), DropdownMenuItem(value: 'Alimentação', child: Text('Alimentação')), DropdownMenuItem(value: 'Lazer', child: Text('Lazer')), DropdownMenuItem(value: 'Estudos', child: Text('Estudos'))], onChanged: (v) => setSheet(() => category = v ?? 'Dia a dia')),
               ListTile(contentPadding: EdgeInsets.zero, title: const Text('Data do gasto'), subtitle: Text(dateLabel(date)), trailing: const Icon(Icons.calendar_month), onTap: () async { final picked = await showDatePicker(context: context, initialDate: date, firstDate: DateTime(2020), lastDate: DateTime(2100)); if (picked != null) setSheet(() => date = picked); }),
               const SizedBox(height: 12),
-              ElevatedButton(onPressed: () async { final parsed = double.tryParse(amount.text.replaceAll('.', '').replaceAll(',', '.')); if (title.text.trim().isEmpty || parsed == null || parsed <= 0) return; await context.read<FinanceProvider>().addExpense(title: title.text.trim(), amount: parsed, category: category, date: date); if (context.mounted) Navigator.pop(context); }, child: const Text('Salvar gasto')),
+              ElevatedButton(onPressed: () async { final parsed = parseBrazilianMoney(amount.text);
+                    if (title.text.trim().isEmpty || parsed == null || parsed <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Informe uma descrição e um valor válido maior que zero.')),
+                      );
+                      return;
+                    }
+                    try {
+                      await context.read<FinanceProvider>().addExpense(title: title.text.trim(), amount: parsed, category: category, date: date);
+                      if (context.mounted) Navigator.pop(context);
+                    } catch (error) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Não foi possível salvar. $error')),
+                        );
+                      }
+                    } }, child: const Text('Salvar gasto')),
             ]),
           ),
         ),
