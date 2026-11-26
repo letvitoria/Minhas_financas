@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../providers/finance_provider.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/record_crud_actions.dart';
 
 class BillsPage extends StatelessWidget {
   const BillsPage({super.key});
@@ -167,10 +168,13 @@ class BillsPage extends StatelessWidget {
                                   : AppColors.orange,
                             ),
                           ),
-                          title: Text(
-                            bill.title,
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
+                          title: Row(children: [
+                            Expanded(child: Text(bill.title, style: const TextStyle(fontWeight: FontWeight.w800))),
+                            RecordCrudActions(table: 'bills', id: bill.id, label: 'conta', values: {
+                              'title': bill.title, 'amount': bill.amount, 'due_date': bill.dueDate.toIso8601String().split('T').first,
+                              'recurrence': bill.recurrence, 'is_paid': bill.isPaid,
+                            }),
+                          ]),
                           subtitle: Text(
                             'Vencimento: ${dateLabel(bill.dueDate)} • ${_recurrenceLabel(bill.recurrence)}',
                           ),

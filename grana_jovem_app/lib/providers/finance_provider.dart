@@ -139,6 +139,16 @@ class FinanceProvider extends ChangeNotifier {
     await refresh();
   }
 
+  Future<void> updateRecord(String table, String id, Map<String, dynamic> values) async {
+    await _repository.updateRecord(table, id, values);
+    await refresh();
+  }
+
+  Future<void> deleteRecord(String table, String id) async {
+    await _repository.deleteRecord(table, id);
+    await refresh();
+  }
+
   Future<void> toggleBill(Bill bill) async {
     if (!bill.isPaid) {
       await _repository.payBill(bill.id);

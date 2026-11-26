@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../providers/finance_provider.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/record_crud_actions.dart';
 
 class IncomePage extends StatelessWidget {
   const IncomePage({super.key});
@@ -153,10 +154,13 @@ class IncomePage extends StatelessWidget {
                               color: AppColors.green,
                             ),
                           ),
-                          title: Text(
-                            income.title,
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
+                          title: Row(children: [
+                            Expanded(child: Text(income.title, style: const TextStyle(fontWeight: FontWeight.w800))),
+                            RecordCrudActions(table: 'income_sources', id: income.id, label: 'renda', values: {
+                              'title': income.title, 'amount': income.amount, 'frequency': income.frequency,
+                              'received_on': income.receivedOn.toIso8601String().split('T').first,
+                            }),
+                          ]),
                           subtitle: Text(
                             '${income.frequency == 'monthly' ? 'Mensal' : 'Extra'} • ${dateLabel(income.receivedOn)}',
                           ),

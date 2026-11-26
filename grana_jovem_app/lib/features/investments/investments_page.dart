@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../providers/finance_provider.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/record_crud_actions.dart';
 
 class InvestmentsPage extends StatelessWidget {
   const InvestmentsPage({super.key});
@@ -263,7 +264,12 @@ class InvestmentsPage extends StatelessWidget {
                         (item) => ListTile(
                           contentPadding:
                               const EdgeInsets.symmetric(horizontal: 4),
-                          title: Text(item.title),
+                          title: Row(children: [
+                            Expanded(child: Text(item.title)),
+                            RecordCrudActions(table: 'investments', id: item.id, label: 'investimento', values: {
+                              'title': item.title, 'category': item.category, 'amount': item.amount,
+                            }),
+                          ]),
                           subtitle: Text(item.category),
                           trailing: Text(
                             currency(item.amount),

@@ -127,6 +127,26 @@ class _HomePageState extends State<HomePage> {
             ]),
             const SizedBox(height: 4),
             _MonthlySpendingCard(transactions: finance.transactions, hideValues: _hideValues),
+            const SizedBox(height: 18),
+            const SectionTitle('Últimos lançamentos'),
+            const SizedBox(height: 8),
+            if (finance.transactions.isEmpty)
+              const Card(child: Padding(padding: EdgeInsets.all(16), child: Text('Nenhum gasto registrado ainda.')))
+            else
+              ...finance.transactions.take(8).map((item) => Card(
+                child: ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.receipt_long_outlined)),
+                  title: Text(item.title),
+                  subtitle: Text(item.category + ' • ' + dateLabel(item.occurredOn)),
+                  trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Text(_money(item.amount), style: const TextStyle(fontWeight: FontWeight.w800)),
+                    RecordCrudActions(table: 'transactions', id: item.id, label: 'lançamento', values: {
+                      'title': item.title, 'type': item.type, 'category': item.category,
+                      'amount': item.amount, 'occurred_on': item.occurredOn.toIso8601String().split('T').first,
+                    }),
+                  ]),
+                ),
+              )),
             const SizedBox(height: 20),
             const SectionTitle('Sua saúde financeira'),
             const SizedBox(height: 10),

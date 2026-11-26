@@ -174,6 +174,30 @@ class FinanceRepository {
     );
   }
 
+  Future<void> updateRecord(String table, String id, Map<String, dynamic> values) async {
+    final updated = await _client
+        .from(table)
+        .update(values)
+        .eq('id', id)
+        .eq('user_id', _userId)
+        .select('id');
+    if (updated.isEmpty) {
+      throw const PostgrestException(message: 'Registro não encontrado ou sem permissão para alterá-lo.');
+    }
+  }
+
+  Future<void> deleteRecord(String table, String id) async {
+    final deleted = await _client
+        .from(table)
+        .delete()
+        .eq('id', id)
+        .eq('user_id', _userId)
+        .select('id');
+    if (deleted.isEmpty) {
+      throw const PostgrestException(message: 'Registro não encontrado ou sem permissão para excluí-lo.');
+    }
+  }
+
   String _date(DateTime value) =>
       '${value.year.toString().padLeft(4, '0')}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}';
 }
