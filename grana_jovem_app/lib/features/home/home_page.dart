@@ -8,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/finance_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../shared/widgets/section_title.dart';
+import '../../shared/widgets/record_crud_actions.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
