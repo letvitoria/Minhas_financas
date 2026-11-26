@@ -6,6 +6,7 @@ import '../../core/utils/formatters.dart';
 import '../../data/models/finance_models.dart';
 import '../../providers/finance_provider.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/record_crud_actions.dart';
 
 class WishlistPage extends StatelessWidget {
   const WishlistPage({super.key});
@@ -143,7 +144,15 @@ class WishlistPage extends StatelessWidget {
                       const SizedBox(height: 12),
                       ...finance.goals.map((goal) => Padding(
                         padding: const EdgeInsets.only(bottom: 14),
-                        child: _SavingsGoalCard(goal: goal, onAdd: () => _addSaved(context, goal)),
+                        child: _SavingsGoalCard(
+                          goal: goal,
+                          onAdd: () => _addSaved(context, goal),
+                          actions: RecordCrudActions(table: 'wishlist_goals', id: goal.id, label: 'meta', values: {
+                            'title': goal.title, 'target_amount': goal.targetAmount,
+                            'saved_amount': goal.savedAmount,
+                            'target_date': goal.targetDate?.toIso8601String().split('T').first,
+                          }),
+                        ),
                       )),
                     ],
                   ),
@@ -153,9 +162,10 @@ class WishlistPage extends StatelessWidget {
 }
 
 class _SavingsGoalCard extends StatelessWidget {
-  const _SavingsGoalCard({required this.goal, required this.onAdd});
+  const _SavingsGoalCard({required this.goal, required this.onAdd, required this.actions});
   final WishlistGoal goal;
   final VoidCallback onAdd;
+  final Widget actions;
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +182,7 @@ class _SavingsGoalCard extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
               const Expanded(child: Text('Meta de economia', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700))),
+              actions,
               Icon(isComplete ? Icons.check_circle_rounded : Icons.track_changes_rounded, color: Colors.white, size: 28),
             ]),
             const SizedBox(height: 8),
