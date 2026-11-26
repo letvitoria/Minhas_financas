@@ -81,17 +81,26 @@ class InvestmentsPage extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () async {
                     final parsed = parseBrazilianMoney(amount.text);
-                    if (title.text.trim().isEmpty ||
-                        parsed == null ||
-                        parsed <= 0) {
+                    if (title.text.trim().isEmpty || parsed == null || parsed <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Informe uma descrição e um valor válido maior que zero.')),
+                      );
                       return;
                     }
-                    await context.read<FinanceProvider>().addInvestment(
+                    try {
+                      await context.read<FinanceProvider>().addInvestment(
                           title: title.text.trim(),
                           category: category,
                           amount: parsed,
                         );
-                    if (context.mounted) Navigator.pop(context);
+                      if (context.mounted) Navigator.pop(context);
+                    } catch (error) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Não foi possível salvar. $error')),
+                        );
+                      }
+                    }
                   },
                   child: const Text('Salvar investimento'),
                 ),
