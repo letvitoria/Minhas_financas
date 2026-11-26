@@ -16,7 +16,7 @@ class BrazilianMoneyInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final digits = newValue.text.replaceAll(RegExp(r'\\D'), '');
+    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
     if (digits.isEmpty) return const TextEditingValue(text: '');
     final formatted = _number.format(int.parse(digits) / 100);
     return TextEditingValue(
