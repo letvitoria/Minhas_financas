@@ -72,17 +72,15 @@ class InvestmentsPage extends StatelessWidget {
                 const SizedBox(height: 12),
                 TextField(
                   controller: amount,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [BrazilianMoneyInputFormatter()],
                   decoration:
                       const InputDecoration(labelText: 'Valor investido'),
                 ),
                 const SizedBox(height: 18),
                 ElevatedButton(
                   onPressed: () async {
-                    final parsed = double.tryParse(
-                      amount.text.replaceAll('.', '').replaceAll(',', '.'),
-                    );
+                    final parsed = parseBrazilianMoney(amount.text);
                     if (title.text.trim().isEmpty ||
                         parsed == null ||
                         parsed <= 0) {
