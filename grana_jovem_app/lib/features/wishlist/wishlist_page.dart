@@ -77,17 +77,26 @@ class WishlistPage extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () async {
                     final parsed = parseBrazilianMoney(amount.text);
-                    if (title.text.trim().isEmpty ||
-                        parsed == null ||
-                        parsed <= 0) {
+                    if (title.text.trim().isEmpty || parsed == null || parsed <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Informe uma descrição e um valor válido maior que zero.')),
+                      );
                       return;
                     }
-                    await context.read<FinanceProvider>().addGoal(
+                    try {
+                      await context.read<FinanceProvider>().addGoal(
                           title: title.text.trim(),
                           targetAmount: parsed,
                           targetDate: targetDate,
                         );
-                    if (context.mounted) Navigator.pop(context);
+                      if (context.mounted) Navigator.pop(context);
+                    } catch (error) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Não foi possível salvar. $error')),
+                        );
+                      }
+                    }
                   },
                   child: const Text('Criar meta'),
                 ),
