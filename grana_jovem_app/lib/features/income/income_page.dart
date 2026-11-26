@@ -48,8 +48,8 @@ class IncomePage extends StatelessWidget {
                 const SizedBox(height: 12),
                 TextField(
                   controller: amount,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [BrazilianMoneyInputFormatter()],
                   decoration:
                       const InputDecoration(labelText: 'Valor (ex.: 1800,00)'),
                 ),
@@ -82,9 +82,7 @@ class IncomePage extends StatelessWidget {
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () async {
-                    final parsed = double.tryParse(
-                      amount.text.replaceAll('.', '').replaceAll(',', '.'),
-                    );
+                    final parsed = parseBrazilianMoney(amount.text);
                     if (title.text.trim().isEmpty ||
                         parsed == null ||
                         parsed <= 0) {
